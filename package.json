@@ -1,0 +1,23 @@
+{
+  "name": "babylonjs_gametest",
+  "version": "1.0.0",
+  "description": "Guided Learning Babylon.js \"Create a Game\" Series",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PedroZappa/babylonjs_gametest.git"
+  },
+  "author": "Zedro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PedroZappa/babylonjs_gametest/issues"
+  },
+  "homepage": "https://github.com/PedroZappa/babylonjs_gametest#readme",
+  "devDependencies": {
+    "@babylonjs/core": "^8.5.0",
+    "@babylonjs/inspector": "^8.5.0"
+  }
+}
