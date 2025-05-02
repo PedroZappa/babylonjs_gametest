@@ -30,7 +30,13 @@ _SEP	 			= ===================================================
 
 ##@ Compilation Rules 🏗
 
-all: deps	## Build Project
+all: build	
+
+build: deps	## Build Project
+	npm run build
+
+start: all
+	npm run start
 
 deps: install-typescript
 
