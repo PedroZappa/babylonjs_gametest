@@ -48,86 +48,10 @@ install-typescript:
 test_all:						## Run All tests
 	echo "Test!"
 
-siege_bench:	## Run siege benchmark
-	@echo "* $(MAG)$(NAME) $(YEL)under $(BLU)siege$(D) benchmark:"
-	siege -b http://localhost:8080
-
-N_USERS ?= 255
-
-siege_concurrent:
-	@echo "* $(MAG)$(NAME) $(YEL)under $(BLU)siege$(D) by $(N_USERS) users:"
-	siege -c $(N_USERS) http://localhost:8080
-
-
-posting: env run ## Open posting with Webserrv requests
-	@if ! command -v posting &> /dev/null; then \
-		echo "Error: 'posting' command not found. Make sure it's installed."; \
-		exit 1; \
-	fi
-	posting --collection $(POSTING)  --env .env
-
-station: ## Run Webserv w/ posting station
-	@if ! command -v tmux &> /dev/null; then \
-		echo "Error: 'tmux' command not found. Make sure it's installed."; \
-		exit 1; \
-	fi
-	tmux split-window -v "make exec"
-	tmux split-window -h "make posting"
-	tmux resize-pane -U 25
-	tmux resize-pane -L 25
-
-curl_resolve:
-	curl --resolve example.com:8080:127.0.0.1 http://example.com:8080/
-
-curl_body_size:
-	curl -X POST -H "Content-Type: plain/text" --data "$(printf 'A%0.s' {1..1024})" http://localhost:8080/limited -v
-
 ##@ Debug Rules 
 
-gdb: debug $(NAME) $(TEMP_PATH)			## Debug w/ gdb
-	tmux split-window -h "gdb --tui --args ./$(NAME)"
-	tmux resize-pane -L 5
-	# tmux split-window -v "btop"
-	make get_log
 
-vgdb: debug $(NAME) $(TEMP_PATH)			## Debug w/ valgrind (memcheck) & gdb
-	tmux split-window -h "valgrind $(VGDB_ARGS) --log-file=gdb.txt ./$(NAME) $(ARG)"
-	make vgdb_cmd
-	tmux split-window -v "gdb --tui -x $(TEMP_PATH)/gdb_commands.txt $(NAME)"
-	tmux resize-pane -U 18
-	# tmux split-window -v "btop"
-	make get_log
-
-valgrind: debug $(NAME) $(TEMP_PATH)			## Debug w/ valgrind (memcheck)
-	tmux set-option remain-on-exit on
-	tmux split-window -h "valgrind $(VAL_ARGS) ./$(NAME) $(ARG)"
-
-massif: all $(TEMP_PATH)		## Run Valgrind w/ Massif (gather profiling information)
-	@TIMESTAMP=$(shell date +%Y%m%d%H%M%S); \
-	if [ -f massif.out.* ]; then \
-		mv -f massif.out.* $(TEMP_PATH)/massif.out.$$TIMESTAMP; \
-	fi
-	@echo " 🔎 [$(YEL)Massif Profiling$(D)]"
-	valgrind --tool=massif --time-unit=B ./$(NAME) $(ARG)
-	ms_print massif.out.*
-# Learn more about massif and ms_print:
-### https://valgrind.org/docs/manual/ms-manual.html
-
-get_log:
-	touch gdb.txt
-	@if command -v lnav; then \
-		lnav gdb.txt; \
-	else \
-		tail -f gdb.txt; \
-	fi
-
-vgdb_cmd: $(NAME) $(TEMP_PATH)
-	@printf "target remote | vgdb --pid=" > $(TEMP_PATH)/gdb_commands.txt
-	@printf "$(shell pgrep -f valgrind)" >> $(TEMP_PATH)/gdb_commands.txt
-	@printf "\n" >> $(TEMP_PATH)/gdb_commands.txt
-	@cat .vgdbinit >> $(TEMP_PATH)/gdb_commands.txt
-
-##@ Clean-up Rulecurl --resolve example.com:8080:127.0.0.1 http://example.com/s 󰃢
+##@ Clean-up Rules
 
 clean: 				## Remove object files
 	@echo "*** $(YEL)Removing $(MAG)$(NAME)$(D) and deps $(YEL)object files$(D)"
